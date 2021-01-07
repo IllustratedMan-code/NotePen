@@ -20,6 +20,14 @@ const menuTemplate = [{
         {
             label:"Save",
             click: () => {win.webContents.send("save")}
+        },
+        {
+            label:"Open",
+            click: () => {win.webContents.send("open")}
+        },
+        {
+            label:"New",
+            click: () => {win.webContents.send("new")}
         }
     ]
 }]
