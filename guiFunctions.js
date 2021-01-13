@@ -73,9 +73,6 @@ Color5.addEventListener("click", function() {
 Color6.addEventListener("click", function() {
     changeColorPicker(Color6);
 });
-Color7.addEventListener("click", function() {
-    changeColorPicker(Color7);
-});
 ColorPicker.addEventListener("input",function(e){
     CurrentColor.style.backgroundColor = e.target.value;
     strokeColor = e.target.value;
