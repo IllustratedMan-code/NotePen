@@ -8,11 +8,23 @@
 </head>
 
 <body>
+    <div id="GuiContainer">
 
-    <div id="CanvasContainer">
-        <canvas id="canvas"> Your browser is bad </canvas>
-        <script src="./CanvasDraw.js"></script>
-        <script src="./guiFunctions.js" ></script>
+        <div id="PenOptions">
+            <Button class ="Colors" id="Color1"></Button>
+            <Button class ="Colors" id="Color2"></Button>
+            <Button class ="Colors" id="Color3"></Button>
+            <Button class ="Colors" id="Color4"></Button>
+            <Button class ="Colors" id="Color5"></Button>
+            <Button class ="Colors" id="Color6"></Button>
+            <Button class ="Colors" id="Color7"></Button>
+            <input type="color" id ="Colorpicker">
+        </div>
+        <div id="CanvasContainer">
+            <canvas id="canvas"> Your browser does not support html5 </canvas>
+            <script src="./CanvasDraw.js"></script>
+            <script src="./guiFunctions.js" ></script>
+        </div>
     </div>
 </body>
 </html>

@@ -1,7 +1,7 @@
 
 // colors
-const canvasColor = 'white';
-const strokeColor = 'black';
+const canvasColor = 'black';
+var strokeColor = 'white';
 
 
 // get our canvas element
@@ -9,15 +9,21 @@ const canvas = document.getElementById("canvas");
 const container = document.getElementById("CanvasContainer");
 const context = canvas.getContext("2d");
 
+//gives canvas its own resizing context;
+//not needed if set in css;
+//canvas.style.position = 'absolute';
+
 
 // disable right clicking context menu
 document.oncontextmenu = function () {
     return false;
 }
 
-// list of all strokes drawn
+// list of all lines drawn
 const drawings = [];
-
+// number of Complete Strokes made (pen down, pen up)
+var StrokeNumber = 0;
+var Stroking = false;
 // coordinates of our cursor
 let cursorX;
 let cursorY;
@@ -55,13 +61,12 @@ function redrawCanvas() {
     // set the canvas to the size of the window
 
     var containerOffset = container.getBoundingClientRect();
-    canvas.width = document.body.clientWidth - containerOffset.left;
-    canvas.height = document.body.clientHeight - containerOffset.top;
-    context.fillStyle = canvasColor;
-    context.fillRect(containerOffset.left, containerOffset.top, canvas.width, canvas.height);
+    //changing width and height redraws canvas
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
     for (let i = 0; i < drawings.length; i++) {
         const line = drawings[i];
-        drawLine(toScreenX(line.x0), toScreenY(line.y0), toScreenX(line.x1), toScreenY(line.y1));
+        drawLine(toScreenX(line.x0), toScreenY(line.y0), toScreenX(line.x1), toScreenY(line.y1), line.color);
     }
 }
 redrawCanvas();
@@ -71,12 +76,46 @@ window.addEventListener("resize", (event) => {
     redrawCanvas();
 });
 
-// Mouse Event Handlers
+// Mouse Event Handlers and handles events
 canvas.addEventListener('mousedown', onMouseDown);
 canvas.addEventListener('mouseup', onMouseUp, false);
 canvas.addEventListener('mouseout', onMouseUp, false);
 canvas.addEventListener('mousemove', onMouseMove, false);
 canvas.addEventListener('wheel', onMouseWheel, false);
+// adds event for keyboard
+document.addEventListener('keydown', function(e){
+    if (e.code == "KeyB"){
+
+        let RecentStroke = 0;
+        drawings.forEach(function(row){
+            RecentStroke = Math.max(row.StrokeN, RecentStroke);
+        });
+        Undo(RecentStroke);
+    };
+})
+/* This adds an event listener to auxclicks, middle click is 1 may be needed when mousedown becomes primary only
+canvas.addEventListener('auxclick', function(e){
+    console.log(e.button);
+})*/
+// removes a specific stroke from drawings (all lines that make up a stroke)
+function Undo(N) {
+    let strokeLength = 0;
+    let start = false;
+    let startn;
+    drawings.forEach(function(row, i){
+        if(row.StrokeN == N){
+            strokeLength++;
+            if (start == false){
+                start = true;
+                startn = i;
+            }
+        };
+    });
+    drawings.splice(startn, strokeLength);
+    strokeLength = 0;
+    redrawCanvas();
+
+}
 
 
 // Touch Event Handlers 
@@ -86,12 +125,17 @@ canvas.addEventListener('wheel', onMouseWheel, false);
 // mouse functions
 let leftMouseDown = false;
 let rightMouseDown = false;
+let middleMouseDown = false;
 function onMouseDown(event) {
 
     // detect left clicks
     if (event.button == 0) {
         leftMouseDown = true;
-        rightMouseDown = false;
+    }
+    // detect middle clicks
+    if (event.button == 1) {
+        middleMouseDown = true;
+        leftMouseDown = false;
     }
     // detect right clicks
     if (event.button == 2) {
@@ -110,7 +154,6 @@ function onMouseDown(event) {
 }
 function onMouseMove(event) {
     // get mouse position
-
     var containerOffset = container.getBoundingClientRect();
     cursorX = event.pageX - containerOffset.left;
     cursorY = event.pageY - containerOffset.top;
@@ -118,29 +161,50 @@ function onMouseMove(event) {
     const scaledY = toTrueY(cursorY);
     const prevScaledX = toTrueX(prevCursorX);
     const prevScaledY = toTrueY(prevCursorY);
+    if (rightMouseDown || middleMouseDown)leftMouseDown=false;
     if (leftMouseDown) {
         // add the line to our drawing history
         drawings.push({
             x0: prevScaledX,
             y0: prevScaledY,
             x1: scaledX,
-            y1: scaledY
+            y1: scaledY,
+            color: strokeColor,
+            StrokeN: StrokeNumber
         });
         // draw a line
-        drawLine(prevCursorX, prevCursorY, cursorX, cursorY);
+        drawLine(prevCursorX, prevCursorY, cursorX, cursorY, strokeColor);
+        Stroking = true;
     }
-    if (rightMouseDown) {
+    if (middleMouseDown) {
         // move the screen
         offsetX += (cursorX - prevCursorX) / scale;
         offsetY += (cursorY - prevCursorY) / scale;
         redrawCanvas();
     }
+    if (rightMouseDown) {
+        // eraser
+
+        // line intersection
+        drawings.forEach(function(row){
+            let inter = intersect(prevScaledX, scaledX, prevScaledY, scaledY, row.x0, row.x1, row.y0, row.y1);
+            if (intersect(prevScaledX, scaledX, prevScaledY, scaledY, row.x0, row.x1, row.y0, row.y1)){
+                Undo(row.StrokeN);
+            };
+        });
+
+    }
     prevCursorX = cursorX;
     prevCursorY = cursorY;
 }
 function onMouseUp() {
+    if (Stroking){
+        Stroking = false;
+        StrokeNumber++;
+    };
     leftMouseDown = false;
     rightMouseDown = false;
+    middleMouseDown = false;
 }
 function onMouseWheel(event) {
     const deltaY = event.deltaY;
@@ -163,12 +227,26 @@ function onMouseWheel(event) {
     offsetY -= unitsAddTop;
     redrawCanvas();
 }
-function drawLine(x0, y0, x1, y1) {
+function drawLine(x0, y0, x1, y1, color) {
     context.beginPath();
     context.moveTo(x0, y0);
     context.lineTo(x1, y1);
-    context.strokeStyle = strokeColor;
+    context.strokeStyle = color;
     context.lineWidth = 2;
     context.stroke();
 }
 
+function intersect (x1, x2, y1, y2, x3, x4, y3, y4){
+    let m1 = ((y2-y1)/(x2-x1));
+    let m2 = ((y4-y3)/(x4-x3));
+    if (Math.abs(m1) == Math.abs(m2))return(false);
+    let b1 = y1-(m1*x1);
+    let b2 = y3-(m2*x3);
+    let x = ((b2-b1)/(m1-m2));
+    let y = m1 * x + b1;
+    if ((x >= Math.min(x1, x2)) && (x <= Math.max(x1, x2)) && (y >= Math.min(y1, y2)) && (y <=Math.max(y1,y2)) && (Math.min(x3, x4)) && (x <= Math.max(x3, x4)) && (y >= Math.min(y3, y4)) && (y <=Math.max(y3,y4))){
+        return(true);
+    }else{
+        return(false);
+    }
+}
