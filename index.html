@@ -9,21 +9,27 @@
 
 <body>
     <div id="GuiContainer">
-
+        <div id="Top" >
+            <div id ="FileDirectory" ></div>
+            <div id="CanvasContainer">
+                <canvas id="canvas"> Your browser does not support html5 </canvas>
+            </div>
+        </div>
         <div id="PenOptions">
+            <Button class ="FilePath" id="FilePath"></Button>
             <Button class ="Colors" id="Color1"></Button>
             <Button class ="Colors" id="Color2"></Button>
             <Button class ="Colors" id="Color3"></Button>
             <Button class ="Colors" id="Color4"></Button>
             <Button class ="Colors" id="Color5"></Button>
             <Button class ="Colors" id="Color6"></Button>
-            <input type="color" id ="Colorpicker">
+            <label class ="Colors" ><input type="color" id ="Colorpicker"></label>
         </div>
-        <div id="CanvasContainer">
-            <canvas id="canvas"> Your browser does not support html5 </canvas>
-            <script src="./CanvasDraw.js"></script>
-            <script src="./guiFunctions.js" ></script>
-        </div>
+        <script src="./CanvasDraw.js"></script>
+        <script src="./guiFunctions.js" ></script>
+        <script src="./FileManager.js"></script>
+
+        
     </div>
 </body>
 </html>

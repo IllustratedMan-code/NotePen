@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, MenuItem } = require('electron');
+const { app, BrowserWindow, Menu, MenuItem, dialog, ipcMain } = require('electron');
 let win = null;
 function createWindow () {
   // Create the browser window.
@@ -6,13 +6,18 @@ function createWindow () {
     width: 800,
     height: 600,
     webPreferences: {
-      nodeIntegration: true
+        nodeIntegration: true,
+        enableRemoteModule: true
     }
   });
 
      // and load the index.html of the app.
     win.loadFile('index.html');
+    //console.log(dialog.showOpenDialog({ properties: ['openDirectory'] }));
 }
+
+
+
 
 const menuTemplate = [{
     label: "File",
@@ -33,5 +38,11 @@ const menuTemplate = [{
 }]
 const menu = Menu.buildFromTemplate(menuTemplate);
 Menu.setApplicationMenu(menu);
+ipcMain.on('OpenFileDialog', (event, arg) => {
+    let f = dialog.showOpenDialogSync({ properties: ['openFile'] });
+    console.log(f);
+    event.reply('FileDialogPath', f);
+});
 
 app.whenReady().then(createWindow);
+

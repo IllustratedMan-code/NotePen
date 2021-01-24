@@ -84,7 +84,7 @@ canvas.addEventListener('mousemove', onMouseMove, false);
 canvas.addEventListener('wheel', onMouseWheel, false);
 // adds event for keyboard
 document.addEventListener('keydown', function(e){
-    if (e.code == "KeyB"){
+    if (e.code == "KeyX"){
 
         let RecentStroke = 0;
         drawings.forEach(function(row){
@@ -92,7 +92,7 @@ document.addEventListener('keydown', function(e){
         });
         Undo(RecentStroke);
     };
-})
+});
 /* This adds an event listener to auxclicks, middle click is 1 may be needed when mousedown becomes primary only
 canvas.addEventListener('auxclick', function(e){
     console.log(e.button);

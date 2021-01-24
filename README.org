@@ -1,0 +1,10 @@
+* Aim
+  The aim of this app is to provide an infinite canvas notetaking experience for drawing tablets without touch functionality.
+** List of features that are intended
+   * [ ] Pen pressure support
+   * [X] Infinite canvas
+   * [ ] Text Boxes 
+   * [X] Color Palette - changeable colors and different "wells"
+   * [ ] Stroke Correction
+   * [ ] File Saving ability - proof of concept already exists but hope to save directly to svg
+   * [ ] Configurable Keymap
